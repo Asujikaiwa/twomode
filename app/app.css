@@ -1,0 +1,175 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------------------
+   Theme switching has three states, not two:
+     - explicit choice  -> data-theme="dark" | "light" on <html>
+     - system (default) -> nothing stamped, only prefers-color-scheme decides
+   Every colour is declared once in :root and only redefined per theme, so no
+   component ever needs to know which theme is active.
+--------------------------------------------------------------------------- */
+
+:root {
+  /* Surfaces — neutrals are biased toward the brand blue, never pure grey. */
+  --tm-ground: #ffffff;
+  --tm-surface: #f3f7fc;
+  --tm-surface-2: #e9f0f9;
+  --tm-border: #d8e3f0;
+  --tm-border-strong: #b9cbe2;
+
+  /* Text */
+  --tm-ink: #0a1626;
+  --tm-ink-2: #2c3e56;
+  --tm-muted: #5d708a;
+
+  /* The two product roles. These are load-bearing: the whole product is the
+     distinction between who writes and who reviews. */
+  --tm-maker: #1b62e0;
+  --tm-maker-soft: #e7effc;
+  --tm-checker: #6b3ad1;
+  --tm-checker-soft: #efe9fb;
+
+  /* Semantic state — deliberately separate from the two role colours. */
+  --tm-ok: #0f7048;
+  --tm-ok-soft: #e3f3ec;
+  --tm-warn: #9a5600;
+  --tm-warn-soft: #faf0df;
+  --tm-risk: #b23325;
+  --tm-risk-soft: #fbeae8;
+
+  --tm-ring: #1b62e0;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --tm-ground: #080f1a;
+    --tm-surface: #0e1928;
+    --tm-surface-2: #152438;
+    --tm-border: #1e3049;
+    --tm-border-strong: #2c4462;
+    --tm-ink: #e8eef7;
+    --tm-ink-2: #c2d0e2;
+    --tm-muted: #8ba0bb;
+    --tm-maker: #6f9cf5;
+    --tm-maker-soft: #132743;
+    --tm-checker: #a98af0;
+    --tm-checker-soft: #221a3c;
+    --tm-ok: #4fc294;
+    --tm-ok-soft: #0f2a20;
+    --tm-warn: #e5ac5c;
+    --tm-warn-soft: #2c2113;
+    --tm-risk: #f08a7c;
+    --tm-risk-soft: #301813;
+    --tm-ring: #6f9cf5;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --tm-ground: #080f1a;
+  --tm-surface: #0e1928;
+  --tm-surface-2: #152438;
+  --tm-border: #1e3049;
+  --tm-border-strong: #2c4462;
+  --tm-ink: #e8eef7;
+  --tm-ink-2: #c2d0e2;
+  --tm-muted: #8ba0bb;
+  --tm-maker: #6f9cf5;
+  --tm-maker-soft: #132743;
+  --tm-checker: #a98af0;
+  --tm-checker-soft: #221a3c;
+  --tm-ok: #4fc294;
+  --tm-ok-soft: #0f2a20;
+  --tm-warn: #e5ac5c;
+  --tm-warn-soft: #2c2113;
+  --tm-risk: #f08a7c;
+  --tm-risk-soft: #301813;
+  --tm-ring: #6f9cf5;
+  color-scheme: dark;
+}
+
+/* Tailwind utilities are generated from these names: bg-ground, text-maker,
+   border-border-strong, and so on. `inline` keeps the var reference live so
+   the utilities follow the active theme. */
+@theme inline {
+  --color-ground: var(--tm-ground);
+  --color-surface: var(--tm-surface);
+  --color-surface-2: var(--tm-surface-2);
+  --color-border-subtle: var(--tm-border);
+  --color-border-strong: var(--tm-border-strong);
+
+  --color-ink: var(--tm-ink);
+  --color-ink-2: var(--tm-ink-2);
+  --color-muted: var(--tm-muted);
+
+  --color-maker: var(--tm-maker);
+  --color-maker-soft: var(--tm-maker-soft);
+  --color-checker: var(--tm-checker);
+  --color-checker-soft: var(--tm-checker-soft);
+
+  --color-ok: var(--tm-ok);
+  --color-ok-soft: var(--tm-ok-soft);
+  --color-warn: var(--tm-warn);
+  --color-warn-soft: var(--tm-warn-soft);
+  --color-risk: var(--tm-risk);
+  --color-risk-soft: var(--tm-risk-soft);
+
+  /* IBM Plex Sans Thai carries Latin and Thai in one family; Noto Sans SC
+     covers Simplified Chinese. Listing both means a mixed-script page never
+     falls back to a system font mid-sentence. */
+  --font-sans:
+    "IBM Plex Sans Thai", "Noto Sans SC", ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-display: "Archivo", "IBM Plex Sans Thai", ui-sans-serif, system-ui, sans-serif;
+}
+
+/* --------------------------------------------------------------------------- */
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  body {
+    background-color: var(--tm-ground);
+    color: var(--tm-ink);
+    font-family: var(--font-sans);
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* A visible focus ring is not optional — it is how keyboard users navigate. */
+  :focus-visible {
+    outline: 2px solid var(--tm-ring);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  ::selection {
+    background: var(--tm-maker-soft);
+    color: var(--tm-ink);
+  }
+}
+
+@layer components {
+  /* Every interactive target meets the 44px minimum from WCAG 2.1 AA. */
+  .tap-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}

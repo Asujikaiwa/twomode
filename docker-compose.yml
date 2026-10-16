@@ -1,0 +1,33 @@
+# Local-only helpers. The app itself does NOT run here — it runs in workerd via
+# `npm run dev`, and D1 and KV are emulated locally by wrangler. These
+# containers only cover what wrangler cannot fake.
+services:
+  # Catches every outgoing email in development so nothing real is ever sent
+  # to a test address. Web UI: http://localhost:8025
+  mailpit:
+    image: axllent/mailpit:v1.21
+    container_name: twomode-mailpit
+    restart: unless-stopped
+    ports:
+      - "1025:1025" # SMTP
+      - "8025:8025" # web UI
+    environment:
+      MP_MAX_MESSAGES: 500
+      MP_SMTP_AUTH_ACCEPT_ANY: 1
+      MP_SMTP_AUTH_ALLOW_INSECURE: 1
+
+  # Browse the local D1 SQLite file with a GUI when a query looks wrong.
+  # The file lives under .wrangler/state after the first `npm run dev`.
+  sqlite-web:
+    image: coleifer/sqlite-web:latest
+    container_name: twomode-sqlite-web
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./.wrangler:/data
+    command: >
+      sh -c "sqlite_web --host 0.0.0.0 --port 8080 --read-only
+      $$(find /data -name '*.sqlite' | head -n 1)"
+    profiles:
+      - tools

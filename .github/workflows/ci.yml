@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22.22.2"
+          cache: npm
+
+      # npm 10.9.x crashes resolving this tree with strict peer deps
+      # (better-auth declares an optional peer on an older vitest major).
+      # Pin the flag here so CI and local installs cannot drift apart.
+      - name: Install
+        run: npm ci --legacy-peer-deps
+
+      - name: Audit dependencies
+        run: npm audit --audit-level=high
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Unit tests with coverage thresholds
+        run: npm run test:coverage
+
+      - name: Build
+        run: npm run build
+
+      # Guards the LCP budget: a client entry that suddenly doubles is a
+      # regression worth failing the build over, not a footnote in a log.
+      - name: Client bundle budget
+        run: |
+          BYTES=$(find build/client/assets -name 'entry.client-*.js' -exec wc -c {} + | tail -1 | awk '{print $1}')
+          echo "client entry: ${BYTES} bytes"
+          test "${BYTES}" -lt 260000

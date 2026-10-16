@@ -1,0 +1,80 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "twomode",
+  "main": "./workers/app.ts",
+  "compatibility_date": "2026-09-01",
+  "compatibility_flags": ["nodejs_compat"],
+
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1
+  },
+
+  "assets": {
+    "directory": "./build/client",
+    "binding": "ASSETS"
+  },
+
+  "vars": {
+    "APP_URL": "http://localhost:5173",
+    "ENVIRONMENT": "development"
+  },
+
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "twomode-db",
+      // Replace with the id printed by: wrangler d1 create twomode-db
+      "database_id": "REPLACE_WITH_D1_DATABASE_ID",
+      "migrations_dir": "./server/db/migrations"
+    }
+  ],
+
+  "kv_namespaces": [
+    {
+      // Sessions, rate-limit counters, idempotency records, dedupe cache.
+      "binding": "KV",
+      "id": "REPLACE_WITH_KV_NAMESPACE_ID"
+    }
+  ],
+
+  // Secrets are never in this file. Set them with:
+  //   wrangler secret put BETTER_AUTH_SECRET
+  //   wrangler secret put KEY_ENCRYPTION_KEY
+  //   wrangler secret put RESEND_API_KEY
+
+  "env": {
+    "staging": {
+      "name": "twomode-staging",
+      "vars": {
+        "APP_URL": "https://staging.twomode.app",
+        "ENVIRONMENT": "staging"
+      },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "twomode-db-staging",
+          "database_id": "REPLACE_WITH_STAGING_D1_ID",
+          "migrations_dir": "./server/db/migrations"
+        }
+      ],
+      "kv_namespaces": [{ "binding": "KV", "id": "REPLACE_WITH_STAGING_KV_ID" }]
+    },
+    "production": {
+      "name": "twomode",
+      "vars": {
+        "APP_URL": "https://twomode.app",
+        "ENVIRONMENT": "production"
+      },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "twomode-db",
+          "database_id": "REPLACE_WITH_PROD_D1_ID",
+          "migrations_dir": "./server/db/migrations"
+        }
+      ],
+      "kv_namespaces": [{ "binding": "KV", "id": "REPLACE_WITH_PROD_KV_ID" }]
+    }
+  }
+}
